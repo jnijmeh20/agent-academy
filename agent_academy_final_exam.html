@@ -1,0 +1,1199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Academy – Final Exam</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy: #0a1628;
+    --navy-mid: #162240;
+    --navy-light: #1e3258;
+    --blue: #1565C0;
+    --blue-light: #5BB8FF;
+    --teal: #00b8a0;
+    --white: #ffffff;
+    --off-white: #f4f6fa;
+    --gray-light: #e8ecf3;
+    --gray-mid: #8a94a8;
+    --selected-bg: #E3F0FF;
+    --selected-border: #1565C0;
+    --correct: #1db87e;
+    --correct-bg: #e6f9f2;
+    --incorrect: #e0455a;
+    --incorrect-bg: #fdeef0;
+    --gold: #F59E0B;
+    --radius: 10px;
+    --font: 'DM Sans', system-ui, sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html, body {
+    margin: 0; padding: 0;
+    width: 100%; min-height: 100vh;
+    font-family: var(--font);
+    background: var(--off-white);
+    color: var(--navy);
+  }
+
+  body {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 0;
+  }
+
+  .wrap {
+    width: 100%; max-width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 28px 40px 24px;
+    position: relative;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: var(--teal);
+    opacity: 0.06;
+  }
+  .header-eyebrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #5BB8FF;
+    margin-bottom: 6px;
+  }
+  .header-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 6px;
+  }
+  .header-sub {
+    font-size: 15px;
+    color: #90CAF9;
+  }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    background: var(--navy-mid);
+    height: 4px;
+    flex-shrink: 0;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--teal);
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  /* ── Body ── */
+  .body {
+    background: var(--white);
+    padding: 36px 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Intro screen ── */
+  .intro-screen { display: flex; flex-direction: column; }
+  .intro-screen.hidden { display: none; }
+
+  .intro-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--off-white);
+    border: 1px solid var(--gray-light);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--gray-mid);
+    margin-bottom: 24px;
+    align-self: flex-start;
+  }
+  .intro-badge svg { width: 14px; height: 14px; color: var(--gold); }
+
+  .intro-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+  .intro-body {
+    font-size: 16px;
+    color: #444;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 560px;
+  }
+
+  .intro-rules {
+    background: var(--off-white);
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 32px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .intro-rule {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--navy);
+    line-height: 1.5;
+  }
+  .rule-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--teal);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  .start-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 14px 32px;
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .start-btn:hover { background: var(--navy-light); }
+  .start-btn svg { width: 16px; height: 16px; }
+
+  /* ── Question panel ── */
+  .q-panel { display: none; flex-direction: column; }
+  .q-panel.show { display: flex; }
+
+  .q-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+  .q-counter {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--gray-mid);
+  }
+  .q-counter span { color: var(--blue); font-weight: 500; }
+  .q-dots { display: flex; gap: 6px; }
+  .q-dot {
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--gray-light);
+    transition: background 0.2s;
+  }
+  .q-dot.active { background: var(--blue); }
+  .q-dot.done { background: var(--teal); }
+
+  .q-text {
+    font-size: 19px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--navy);
+    margin-bottom: 24px;
+    flex-shrink: 0;
+  }
+
+  .options-list {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    margin-bottom: 28px;
+    flex: 1;
+  }
+
+  .option-btn {
+    width: 100%;
+    text-align: left;
+    padding: 15px 18px;
+    border-radius: 8px;
+    border: 1.5px solid var(--gray-light);
+    background: var(--off-white);
+    font-family: var(--font);
+    font-size: 16px;
+    color: var(--navy);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.5;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--blue);
+    background: var(--selected-bg);
+  }
+  .option-btn.selected {
+    border-color: var(--selected-border);
+    background: var(--selected-bg);
+  }
+  .option-btn.selected .opt-letter { color: var(--blue); }
+  .option-btn:disabled { cursor: default; }
+  .option-btn.correct { border-color: var(--correct); background: var(--correct-bg); }
+  .option-btn.correct .opt-letter { color: var(--correct); }
+  .option-btn.incorrect { border-color: var(--incorrect); background: var(--incorrect-bg); }
+  .option-btn.incorrect .opt-letter { color: var(--incorrect); }
+  .option-btn.reveal-correct { border-color: var(--correct); background: var(--correct-bg); opacity: 0.7; }
+
+  .opt-letter {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--gray-mid);
+    min-width: 20px;
+    margin-top: 2px;
+  }
+
+  .q-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .q-nav-hint { font-size: 14px; color: var(--gray-mid); }
+
+  .next-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 13px 28px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .next-btn.active { opacity: 1; pointer-events: all; }
+  .next-btn.active:hover { background: var(--navy-light); }
+  .next-btn svg { width: 15px; height: 15px; }
+
+  /* ── Results panel ── */
+  .results-panel { display: none; flex-direction: column; align-items: center; }
+  .results-panel.show { display: flex; }
+
+  .score-ring {
+    width: 110px; height: 110px;
+    margin: 0 auto 20px;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring circle { transition: stroke-dashoffset 0.8s ease; }
+  .score-number {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--navy);
+    text-align: center;
+    line-height: 1.1;
+  }
+  .score-number span { font-size: 13px; color: var(--gray-mid); font-weight: 400; }
+
+  .result-badge {
+    display: inline-block;
+    padding: 5px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .result-badge.pass { background: var(--correct-bg); color: #0d5c3a; }
+  .result-badge.fail { background: var(--incorrect-bg); color: #7a1b27; }
+
+  .results-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+    text-align: center;
+  }
+  .results-sub {
+    font-size: 15px;
+    color: var(--gray-mid);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    text-align: center;
+    max-width: 420px;
+  }
+
+  /* ── Certificate form (shown on pass) ── */
+  .cert-form-wrap {
+    display: none;
+    width: 100%;
+    background: linear-gradient(135deg, #EBF2FF 0%, #f0fdf9 100%);
+    border: 1.5px solid var(--teal);
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    margin-bottom: 24px;
+  }
+  .cert-form-wrap.show { display: block; }
+  .cert-form-title {
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 6px;
+  }
+  .cert-form-sub {
+    font-size: 14px;
+    color: var(--gray-mid);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .form-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .form-field {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .form-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+  }
+  .form-input {
+    padding: 11px 14px;
+    border-radius: 8px;
+    border: 1.5px solid var(--gray-light);
+    background: var(--white);
+    font-family: var(--font);
+    font-size: 15px;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--blue); }
+  .cert-submit-btn {
+    background: var(--teal);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .cert-submit-btn:hover { background: #009e89; }
+  .cert-submit-btn svg { width: 16px; height: 16px; }
+
+  /* ── Certificate display ── */
+  .certificate-wrap {
+    display: none;
+    width: 100%;
+    margin-bottom: 24px;
+  }
+  .certificate-wrap.show { display: block; }
+
+  .certificate {
+    background: var(--white);
+    border: 1px solid var(--gray-light);
+    border-radius: 16px;
+    padding: 0;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 32px rgba(10,22,40,0.10);
+  }
+
+  .cert-top-bar {
+    background: var(--navy);
+    padding: 32px 48px 28px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cert-top-bar::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: var(--teal);
+    opacity: 0.08;
+  }
+  .cert-top-bar::after {
+    content: '';
+    position: absolute;
+    bottom: -40px; left: -40px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: #5BB8FF;
+    opacity: 0.05;
+  }
+
+  .cert-logo-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .cert-logo-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--teal);
+  }
+  .cert-org {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #90CAF9;
+  }
+
+  .cert-badge-ring {
+    width: 80px; height: 80px;
+    margin: 0 auto 0;
+    border-radius: 50%;
+    border: 2px solid rgba(0,184,160,0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,184,160,0.08);
+    position: relative;
+    z-index: 1;
+  }
+  .cert-badge-ring svg { width: 36px; height: 36px; color: var(--teal); }
+
+  .cert-body {
+    padding: 32px 48px 36px;
+    background: var(--white);
+  }
+
+  .cert-presents {
+    font-size: 14px;
+    color: var(--gray-mid);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+  .cert-recipient {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 20px;
+    line-height: 1.15;
+    font-style: italic;
+  }
+
+  .cert-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 auto 20px;
+    max-width: 300px;
+  }
+  .cert-divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--gray-light);
+  }
+  .cert-divider-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--teal);
+    flex-shrink: 0;
+  }
+
+  .cert-desc {
+    font-size: 15px;
+    color: #555;
+    line-height: 1.75;
+    margin-bottom: 20px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .cert-course {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 28px;
+    letter-spacing: -0.01em;
+  }
+
+  .cert-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 32px;
+    padding: 20px 48px;
+    border-top: 1px solid var(--gray-light);
+    flex-wrap: wrap;
+  }
+  .cert-footer-item { text-align: center; }
+  .cert-footer-label {
+    font-size: 10px;
+    font-family: var(--mono);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gray-mid);
+    margin-bottom: 4px;
+  }
+  .cert-footer-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .cert-footer-value.verified { color: var(--correct); }
+
+  .cert-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .download-btn {
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    padding: 13px 28px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .download-btn:hover { background: var(--navy-light); }
+  .download-btn svg { width: 15px; height: 15px; }
+
+  /* ── Breakdown ── */
+  .breakdown-wrap {
+    width: 100%;
+    border: 1px solid var(--gray-light);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .breakdown-header {
+    background: var(--off-white);
+    padding: 10px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gray-mid);
+    font-family: var(--mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--gray-light);
+  }
+  .breakdown-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--gray-light);
+    font-size: 15px;
+  }
+  .breakdown-item:last-child { border-bottom: none; }
+  .bd-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 2px;
+  }
+  .bd-icon.c { background: var(--correct); }
+  .bd-icon.w { background: var(--incorrect); }
+  .bd-icon svg { width: 10px; height: 10px; stroke: white; }
+  .bd-q { color: var(--navy); line-height: 1.45; font-weight: 500; }
+  .bd-ans { font-size: 13px; color: var(--gray-mid); margin-top: 3px; }
+  .bd-ans.wrong { color: var(--incorrect); }
+
+  .results-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 8px;
+  }
+  .retake-btn {
+    background: transparent;
+    border: 1.5px solid var(--navy);
+    color: var(--navy);
+    border-radius: 8px;
+    padding: 12px 28px;
+    font-family: var(--font);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+  }
+  .retake-btn:hover { background: var(--navy); color: var(--white); }
+
+  .q-slide { animation: fadeUp 0.22s ease; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media print {
+    .header, .progress-wrap, .breakdown-wrap, .results-actions, .cert-form-wrap, .cert-actions { display: none !important; }
+    .body { padding: 0; }
+    .certificate { border: 2px solid var(--navy); }
+    .certificate-wrap { display: block !important; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="header-eyebrow">Agent Academy · Agent Foundations</div>
+    <div class="header-title">Final Exam</div>
+    <div class="header-sub">Earn your certification by passing this exam.</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="body">
+
+    <!-- Intro screen -->
+    <div class="intro-screen" id="introScreen">
+      <div class="intro-badge">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        Agent Foundations Certification
+      </div>
+      <div class="intro-title">Ready to get certified?</div>
+      <div class="intro-body">This exam covers everything from Module 1: what agents are, how they differ from chatbots and automation, the components that make them work, and where they create real value. Pass and you will receive your official Agent Foundations certificate.</div>
+      <div class="intro-rules">
+        <div class="intro-rule"><div class="rule-dot"></div><span>5 questions covering all lessons in the module</span></div>
+        <div class="intro-rule"><div class="rule-dot"></div><span>You need 4 out of 5 to pass and earn your certificate</span></div>
+        <div class="intro-rule"><div class="rule-dot"></div><span>No feedback shown during the exam — results appear at the end</span></div>
+        <div class="intro-rule"><div class="rule-dot"></div><span>You can retake the exam as many times as you need</span></div>
+      </div>
+      <button class="start-btn" onclick="startExam()">
+        Start exam
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <!-- Question panel -->
+    <div class="q-panel" id="qPanel">
+      <div class="q-meta">
+        <div class="q-counter">Question <span id="qNum">1</span> of 5</div>
+        <div class="q-dots" id="qDots"></div>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="options-list" id="optionsList"></div>
+      <div class="q-nav">
+        <div class="q-nav-hint" id="navHint">Select an answer to continue</div>
+        <button class="next-btn" id="nextBtn" onclick="nextQ()">
+          <span id="nextBtnText">Next</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Results panel -->
+    <div class="results-panel" id="resultsPanel">
+      <div class="score-ring">
+        <svg width="110" height="110" viewBox="0 0 110 110">
+          <circle cx="55" cy="55" r="46" fill="none" stroke="#e8ecf3" stroke-width="8"/>
+          <circle id="scoreArc" cx="55" cy="55" r="46" fill="none" stroke="#00b8a0" stroke-width="8"
+            stroke-dasharray="289" stroke-dashoffset="289" stroke-linecap="round"/>
+        </svg>
+        <div class="score-number" id="scoreNum">0<br><span>/5</span></div>
+      </div>
+      <div class="result-badge" id="resultBadge"></div>
+      <div class="results-title" id="resultsTitle"></div>
+      <div class="results-sub" id="resultsSub"></div>
+
+      <!-- Certificate email form (pass only) -->
+      <div class="cert-form-wrap" id="certFormWrap">
+        <div class="cert-form-title">Claim your certificate</div>
+        <div class="cert-form-sub">Enter your name and email below. Your email will be recorded and your certificate will appear on this page.</div>
+        <div class="form-row">
+          <div class="form-field">
+            <label class="form-label" for="certName">Full name</label>
+            <input class="form-input" type="text" id="certName" placeholder="Your full name">
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="certEmail">Work email</label>
+            <input class="form-input" type="email" id="certEmail" placeholder="you@cognizant.com">
+          </div>
+        </div>
+        <button class="cert-submit-btn" onclick="submitCert()">
+          Generate my certificate
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+        </button>
+      </div>
+
+      <!-- Certificate display -->
+      <div class="certificate-wrap" id="certWrap">
+        <div class="certificate" id="certDisplay">
+          <div class="cert-top-bar">
+            <div class="cert-logo-row">
+              <div class="cert-logo-dot"></div>
+              <div class="cert-org">Cognizant AI Lab</div>
+              <div class="cert-logo-dot"></div>
+            </div>
+            <div class="cert-badge-ring">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+          </div>
+          <div class="cert-body">
+            <div class="cert-presents">This is to certify that</div>
+            <div class="cert-recipient" id="certRecipientName">Your Name</div>
+            <div class="cert-divider">
+              <div class="cert-divider-line"></div>
+              <div class="cert-divider-dot"></div>
+              <div class="cert-divider-line"></div>
+            </div>
+            <div class="cert-desc">has successfully completed all lessons and passed the final exam for</div>
+            <div class="cert-course">Agent Foundations</div>
+            <div class="cert-desc" style="margin-bottom:0;">demonstrating a solid understanding of AI agents, how they operate, and where they create real value.</div>
+          </div>
+          <div class="cert-footer">
+            <div class="cert-footer-item">
+              <div class="cert-footer-label">Issued by</div>
+              <div class="cert-footer-value">Cognizant AI Lab</div>
+            </div>
+            <div class="cert-footer-item">
+              <div class="cert-footer-label">Program</div>
+              <div class="cert-footer-value">Agent Academy</div>
+            </div>
+            <div class="cert-footer-item">
+              <div class="cert-footer-label">Date</div>
+              <div class="cert-footer-value" id="certDate">-</div>
+            </div>
+            <div class="cert-footer-item">
+              <div class="cert-footer-label">Status</div>
+              <div class="cert-footer-value verified">Certified</div>
+            </div>
+          </div>
+        </div>
+        <div class="cert-actions">
+          <button class="download-btn" id="downloadBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download certificate
+          </button>
+        </div>
+      </div>
+
+      <!-- Breakdown -->
+      <div class="breakdown-wrap" id="breakdownWrap"></div>
+
+      <div class="results-actions">
+        <button class="retake-btn" onclick="retake()">Retake exam</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+
+  // ─────────────────────────────────────────────
+  // GOOGLE FORM CONFIG
+  // Replace these two values after setting up your Google Form
+  // See instructions below the script
+  var GOOGLE_FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSfljGT5H-5widAHfmigSNjrQWxD2_XWlwV3H6z2QE2d8E5u2Q/formResponse";
+  var GOOGLE_FORM_EMAIL_FIELD = "entry.377471300";
+  var GOOGLE_FORM_NAME_FIELD = "entry.323440582";
+  // ─────────────────────────────────────────────
+
+  var questions = [
+    {
+      text: "An AI agent is best described as a system that:",
+      options: [
+        "Generates high-quality responses to user prompts",
+        "Follows a fixed set of predefined rules to complete tasks",
+        "Perceives its environment, makes decisions, and takes actions toward a goal",
+        "Holds natural conversations with users using a language model"
+      ],
+      correct: 2
+    },
+    {
+      text: "A team is evaluating whether to use a chatbot or an AI agent to handle customer refund requests. The process involves checking order history, verifying eligibility, processing the refund in the billing system, and sending a confirmation email. Which is the right choice and why?",
+      options: [
+        "A chatbot, because it can answer the customer's questions about refunds",
+        "An AI agent, because the task involves multiple steps and requires action across systems",
+        "A chatbot, because refunds follow a predictable pattern",
+        "An AI agent, because agents are always better than chatbots for customer service"
+      ],
+      correct: 1
+    },
+    {
+      text: "What is the key difference between how traditional automation and AI agents make decisions?",
+      options: [
+        "Automation uses AI models; agents use rule engines",
+        "Automation is faster; agents are more accurate",
+        "Automation decisions are explicitly programmed in advance; agent decisions are made dynamically based on current context",
+        "Automation works for complex tasks; agents work for simple ones"
+      ],
+      correct: 2
+    },
+    {
+      text: "An agent is partway through a multi-step workflow when it receives an unexpected response from an external system. It reassesses the situation, tries an alternative approach, completes the task, and notes the issue for review. Which component is responsible for this behavior?",
+      options: [
+        "Memory, because it remembered what steps it had already taken",
+        "Perception, because it read the unexpected response",
+        "Tool use, because it needed to call the external system again",
+        "Feedback and iteration, because it evaluated the outcome and adjusted its approach"
+      ],
+      correct: 3
+    },
+    {
+      text: "Which of the following scenarios best illustrates where agents create the most value?",
+      options: [
+        "Converting a batch of uploaded files from PDF to Word format on a schedule",
+        "Answering frequently asked questions from a static knowledge base",
+        "Monitoring transactions in real time, flagging anomalies, triggering verification workflows, and escalating high-risk cases for human review",
+        "Sending a weekly newsletter to a fixed email list"
+      ],
+      correct: 2
+    }
+  ];
+
+  var current = 0;
+  var selected = [];
+  var userAnswers = [];
+  var finalScore = 0;
+
+  function init() {
+    if (!document.getElementById('introScreen')) return;
+    for (var i = 0; i < questions.length; i++) {
+      selected.push(-1);
+      userAnswers.push(-1);
+    }
+    buildDots();
+  }
+
+  function buildDots() {
+    var wrap = document.getElementById('qDots');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (var i = 0; i < questions.length; i++) {
+      var d = document.createElement('div');
+      d.className = 'q-dot';
+      d.id = 'dot-' + i;
+      wrap.appendChild(d);
+    }
+  }
+
+  function updateDots() {
+    for (var i = 0; i < questions.length; i++) {
+      var d = document.getElementById('dot-' + i);
+      if (!d) continue;
+      d.className = 'q-dot';
+      if (i === current) d.classList.add('active');
+      else if (userAnswers[i] !== -1) d.classList.add('done');
+    }
+  }
+
+  window.startExam = function() {
+    document.getElementById('introScreen').classList.add('hidden');
+    document.getElementById('qPanel').classList.add('show');
+    renderQ();
+  };
+
+  function renderQ() {
+    var q = questions[current];
+    document.getElementById('qNum').textContent = current + 1;
+    document.getElementById('progressFill').style.width = ((current / questions.length) * 100) + '%';
+
+    var panel = document.getElementById('qPanel');
+    panel.classList.remove('q-slide');
+    void panel.offsetWidth;
+    panel.classList.add('q-slide');
+
+    document.getElementById('qText').textContent = q.text;
+
+    var list = document.getElementById('optionsList');
+    list.innerHTML = '';
+    var letters = ['A', 'B', 'C', 'D'];
+
+    for (var i = 0; i < q.options.length; i++) {
+      (function(idx) {
+        var wrap = document.createElement('div');
+        var btn = document.createElement('button');
+        btn.className = 'option-btn';
+        if (selected[current] === idx) btn.classList.add('selected');
+        btn.innerHTML = '<span class="opt-letter">' + letters[idx] + '</span><span>' + q.options[idx] + '</span>';
+        btn.onclick = function() { pickAnswer(idx); };
+        wrap.appendChild(btn);
+        list.appendChild(wrap);
+      })(i);
+    }
+
+    var nb = document.getElementById('nextBtn');
+    nb.className = 'next-btn' + (selected[current] !== -1 ? ' active' : '');
+    document.getElementById('navHint').textContent = selected[current] !== -1 ? '' : 'Select an answer to continue';
+    document.getElementById('nextBtnText').textContent = current === questions.length - 1 ? 'Submit exam' : 'Next';
+    updateDots();
+  }
+
+  function pickAnswer(idx) {
+    selected[current] = idx;
+    var buttons = document.querySelectorAll('.option-btn');
+    for (var i = 0; i < buttons.length; i++) buttons[i].classList.remove('selected');
+    buttons[idx].classList.add('selected');
+    document.getElementById('nextBtn').classList.add('active');
+    document.getElementById('navHint').textContent = '';
+  }
+
+  window.nextQ = function() {
+    if (selected[current] === -1) return;
+    userAnswers[current] = selected[current];
+    current++;
+    if (current >= questions.length) {
+      showResults();
+    } else {
+      renderQ();
+    }
+  };
+
+  function showResults() {
+    document.getElementById('qPanel').classList.remove('show');
+    document.getElementById('progressFill').style.width = '100%';
+
+    var panel = document.getElementById('resultsPanel');
+    panel.classList.add('show');
+
+    var score = 0;
+    for (var i = 0; i < questions.length; i++) {
+      if (userAnswers[i] === questions[i].correct) score++;
+    }
+    finalScore = score;
+
+    var passed = score >= 4;
+    var pct = score / questions.length;
+    var circ = 289;
+    var offset = circ - (pct * circ);
+
+    document.getElementById('scoreNum').innerHTML = score + '<br><span>/' + questions.length + '</span>';
+
+    setTimeout(function() {
+      var arc = document.getElementById('scoreArc');
+      arc.style.strokeDashoffset = offset;
+      arc.style.stroke = passed ? '#1db87e' : '#e0455a';
+    }, 100);
+
+    var badge = document.getElementById('resultBadge');
+    badge.textContent = passed ? 'Passed' : 'Not passed';
+    badge.className = 'result-badge ' + (passed ? 'pass' : 'fail');
+
+    document.getElementById('resultsTitle').textContent = passed ? 'You are certified.' : 'Not quite there yet.';
+    document.getElementById('resultsSub').textContent = passed
+      ? 'You passed the Agent Foundations exam. Enter your details below to generate your certificate.'
+      : 'You need 4 out of 5 to pass. Review the module and give it another try.';
+
+    if (passed) {
+      document.getElementById('certFormWrap').classList.add('show');
+    }
+
+    buildBreakdown();
+  }
+
+  function buildBreakdown() {
+    var bd = document.getElementById('breakdownWrap');
+    bd.innerHTML = '<div class="breakdown-header">Question review</div>';
+    var checkSvg = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    var crossSvg = '<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+
+    for (var i = 0; i < questions.length; i++) {
+      var ok = userAnswers[i] === questions[i].correct;
+      var item = document.createElement('div');
+      item.className = 'breakdown-item';
+      var qShort = questions[i].text.length > 75 ? questions[i].text.substring(0, 75) + '...' : questions[i].text;
+      var yourAns = userAnswers[i] !== -1 ? questions[i].options[userAnswers[i]] : 'Not answered';
+      var yourShort = yourAns.length > 65 ? yourAns.substring(0, 65) + '...' : yourAns;
+      item.innerHTML = '<div class="bd-icon ' + (ok ? 'c' : 'w') + '">' + (ok ? checkSvg : crossSvg) + '</div>'
+        + '<div><div class="bd-q">Q' + (i + 1) + ': ' + qShort + '</div>'
+        + '<div class="bd-ans' + (ok ? '' : ' wrong') + '">' + (ok ? 'Correct' : 'Your answer: ' + yourShort) + '</div></div>';
+      bd.appendChild(item);
+    }
+  }
+
+  window.submitCert = function() {
+    var name = document.getElementById('certName').value.trim();
+    var email = document.getElementById('certEmail').value.trim();
+
+    if (!name || !email) {
+      alert('Please enter your full name and email address.');
+      return;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      alert('Please enter a valid email address.');
+      return;
+    }
+
+    // Submit to Google Form silently
+    if (GOOGLE_FORM_ACTION !== "YOUR_GOOGLE_FORM_ACTION_URL") {
+      var formData = new FormData();
+      formData.append(GOOGLE_FORM_NAME_FIELD, name);
+      formData.append(GOOGLE_FORM_EMAIL_FIELD, email);
+      fetch(GOOGLE_FORM_ACTION, {
+        method: 'POST',
+        mode: 'no-cors',
+        body: formData
+      }).catch(function() {});
+    }
+
+    // Show certificate
+    document.getElementById('certFormWrap').classList.remove('show');
+    var today = new Date();
+    var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var dateStr = months[today.getMonth()] + ' ' + today.getDate() + ', ' + today.getFullYear();
+    document.getElementById('certRecipientName').textContent = name;
+    document.getElementById('certDate').textContent = dateStr;
+
+    var certWrap = document.getElementById('certWrap');
+    certWrap.classList.add('show');
+    certWrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    // Wire up download button — opens a clean printable certificate in a new tab
+    var dlBtn = document.getElementById('downloadBtn');
+    dlBtn.onclick = function() {
+      var certHTML = '<!DOCTYPE html><html><head><meta charset="UTF-8">'
+        + '<title>Agent Foundations Certificate</title>'
+        + '<style>'
+        + '@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap");'
+        + '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }'
+        + 'body { font-family: "DM Sans", system-ui, sans-serif; background: #f4f6fa; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 40px 20px; }'
+        + '.cert { background: #fff; border: 1px solid #e8ecf3; border-radius: 16px; overflow: hidden; max-width: 680px; width: 100%; box-shadow: 0 8px 40px rgba(10,22,40,0.13); }'
+        + '.cert-top { background: #0a1628; padding: 40px 56px 36px; text-align: center; position: relative; overflow: hidden; }'
+        + '.cert-top::before { content: ""; position: absolute; top: -60px; right: -60px; width: 220px; height: 220px; border-radius: 50%; background: #00b8a0; opacity: 0.08; }'
+        + '.cert-top::after { content: ""; position: absolute; bottom: -40px; left: -40px; width: 160px; height: 160px; border-radius: 50%; background: #5BB8FF; opacity: 0.05; }'
+        + '.cert-logo-row { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 22px; position: relative; z-index: 1; }'
+        + '.cert-dot { width: 9px; height: 9px; border-radius: 50%; background: #00b8a0; }'
+        + '.cert-org { font-family: "DM Mono", monospace; font-size: 13px; letter-spacing: 0.14em; text-transform: uppercase; color: #90CAF9; }'
+        + '.cert-ring { width: 80px; height: 80px; border-radius: 50%; border: 2px solid rgba(0,184,160,0.3); display: flex; align-items: center; justify-content: center; background: rgba(0,184,160,0.08); margin: 0 auto; position: relative; z-index: 1; }'
+        + '.cert-ring svg { width: 36px; height: 36px; color: #00b8a0; stroke: #00b8a0; }'
+        + '.cert-body { padding: 36px 56px 32px; text-align: center; }'
+        + '.cert-presents { font-size: 14px; color: #8a94a8; margin-bottom: 8px; }'
+        + '.cert-name { font-size: 38px; font-weight: 700; color: #0a1628; margin-bottom: 22px; line-height: 1.15; font-style: italic; }'
+        + '.cert-divider { display: flex; align-items: center; gap: 12px; margin: 0 auto 22px; max-width: 300px; }'
+        + '.cert-line { flex: 1; height: 1px; background: #e8ecf3; }'
+        + '.cert-divider-dot { width: 6px; height: 6px; border-radius: 50%; background: #00b8a0; }'
+        + '.cert-desc { font-size: 15px; color: #555; line-height: 1.75; margin-bottom: 18px; max-width: 420px; margin-left: auto; margin-right: auto; }'
+        + '.cert-course { font-size: 19px; font-weight: 700; color: #0a1628; margin-bottom: 28px; }'
+        + '.cert-footer { display: flex; justify-content: center; gap: 36px; padding: 20px 56px; border-top: 1px solid #e8ecf3; flex-wrap: wrap; }'
+        + '.cert-footer-item { text-align: center; }'
+        + '.cert-footer-label { font-size: 10px; font-family: "DM Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; color: #8a94a8; margin-bottom: 4px; }'
+        + '.cert-footer-value { font-size: 14px; font-weight: 600; color: #0a1628; }'
+        + '.cert-footer-value.v { color: #1db87e; }'
+        + '@media print { body { background: white; padding: 0; } .cert { box-shadow: none; border: 1px solid #ccc; } }'
+        + '</style>'
+        + '</head><body>'
+        + '<div class="cert">'
+        + '<div class="cert-top">'
+        + '<div class="cert-logo-row"><div class="cert-dot"></div><div class="cert-org">Cognizant AI Lab</div><div class="cert-dot"></div></div>'
+        + '<div class="cert-ring"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div>'
+        + '</div>'
+        + '<div class="cert-body">'
+        + '<div class="cert-presents">This is to certify that</div>'
+        + '<div class="cert-name">' + name + '</div>'
+        + '<div class="cert-divider"><div class="cert-line"></div><div class="cert-divider-dot"></div><div class="cert-line"></div></div>'
+        + '<div class="cert-desc">has successfully completed all lessons and passed the final exam for</div>'
+        + '<div class="cert-course">Agent Foundations</div>'
+        + '<div class="cert-desc" style="margin-bottom:0">demonstrating a solid understanding of AI agents, how they operate, and where they create real value.</div>'
+        + '</div>'
+        + '<div class="cert-footer">'
+        + '<div class="cert-footer-item"><div class="cert-footer-label">Issued by</div><div class="cert-footer-value">Cognizant AI Lab</div></div>'
+        + '<div class="cert-footer-item"><div class="cert-footer-label">Program</div><div class="cert-footer-value">Agent Academy</div></div>'
+        + '<div class="cert-footer-item"><div class="cert-footer-label">Date</div><div class="cert-footer-value">' + dateStr + '</div></div>'
+        + '<div class="cert-footer-item"><div class="cert-footer-label">Status</div><div class="cert-footer-value v">Certified</div></div>'
+        + '</div>'
+        + '</div>'
+        + '<p style="text-align:center;margin-top:24px;font-family:DM Sans,sans-serif;font-size:13px;color:#8a94a8;">Press <strong>Ctrl+P</strong> (or <strong>Cmd+P</strong> on Mac) to save as PDF or print.</p>'
+        + '</body></html>';
+
+      var blob = new Blob([certHTML], { type: 'text/html' });
+      var url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    };
+  };
+
+  window.retake = function() {
+    current = 0;
+    selected = [];
+    userAnswers = [];
+    finalScore = 0;
+    for (var i = 0; i < questions.length; i++) {
+      selected.push(-1);
+      userAnswers.push(-1);
+    }
+    document.getElementById('resultsPanel').classList.remove('show');
+    document.getElementById('certFormWrap').classList.remove('show');
+    document.getElementById('certWrap').classList.remove('show');
+    document.getElementById('certName').value = '';
+    document.getElementById('certEmail').value = '';
+    document.getElementById('qPanel').classList.add('show');
+    renderQ();
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+
+})();
+</script>
+
+</body>
+</html>
