@@ -157,6 +157,8 @@ body{display:flex;align-items:flex-start;justify-content:center}
 .slide{animation:fadeUp .22s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script>emailjs.init("qSRc6OyuVe2F8XvyH");</script>
 </head>
 <body>
 <canvas id="confettiCanvas"></canvas>
@@ -164,7 +166,7 @@ body{display:flex;align-items:flex-start;justify-content:center}
   <div class="hdr">
     <div class="hdr-eye">Agent Academy &middot; Agent Foundations</div>
     <div class="hdr-title">Final Exam</div>
-    <div class="hdr-sub">Earn your Cognizant AI Lab certification.</div>
+    <div class="hdr-sub">Earn your Agent Academy certification.</div>
   </div>
   <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
   <div class="body">
@@ -497,6 +499,19 @@ body{display:flex;align-items:flex-start;justify-content:center}
     certDate=months[today.getMonth()]+" "+today.getDate()+", "+today.getFullYear();
     var fd=new FormData(); fd.append(GFN,name); fd.append(GFE,email);
     fetch(GFA,{method:"POST",mode:"no-cors",body:fd}).catch(function(){});
+
+    // EmailJS - send certificate confirmation email
+    emailjs.send("service_gvtky8v","template_yh234ru",{
+      to_name: name,
+      to_email: email,
+      cert_date: certDate,
+      course_name: "Agent Foundations",
+      academy_url: "https://www.cognizant.com/us/en/ai-lab/ai-agent-academy/"
+    }).then(function(){
+      console.log("Certificate email sent to "+email);
+    }).catch(function(err){
+      console.log("EmailJS error:",JSON.stringify(err));
+    });
     document.getElementById("certForm").classList.remove("show");
     document.getElementById("certNameDisplay").textContent=name;
     document.getElementById("certDateDisplay").textContent=certDate;
