@@ -540,21 +540,44 @@ body{display:flex;align-items:flex-start;justify-content:center}
     btn.textContent="Generating...";
     btn.disabled=true;
     function runCapture(){
-      html2canvas(document.getElementById("certCard"),{scale:3,useCORS:true,allowTaint:true,backgroundColor:"#ffffff",logging:false}).then(function(canvas){
+      html2canvas(document.getElementById("certCard"),{
+        scale:3,
+        useCORS:true,
+        allowTaint:true,
+        backgroundColor:"#ffffff",
+        logging:false,
+        imageTimeout:0
+      }).then(function(canvas){
+        var dataURL=canvas.toDataURL("image/png");
         var link=document.createElement("a");
-        link.download="AgentFoundations_Certificate_"+certName.replace(/[^a-zA-Z0-9]/g,"_")+".png";
-        link.href=canvas.toDataURL("image/png");
-        document.body.appendChild(link); link.click(); document.body.removeChild(link);
-        btn.textContent="Download certificate"; btn.disabled=false;
-      }).catch(function(){ btn.textContent="Download certificate"; btn.disabled=false; });
+        link.href=dataURL;
+        link.download="AgentFoundations_Certificate_"+(certName||"certificate").replace(/[^a-zA-Z0-9]/g,"_")+".png";
+        link.style.display="none";
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(function(){ document.body.removeChild(link); },200);
+        btn.textContent="Download certificate";
+        btn.disabled=false;
+      }).catch(function(err){
+        console.log("html2canvas error:",err);
+        btn.textContent="Download certificate";
+        btn.disabled=false;
+        alert("Could not generate image. Please try again.");
+      });
     }
     if(typeof html2canvas==="undefined"){
       var s=document.createElement("script");
       s.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
       s.onload=function(){ runCapture(); };
-      s.onerror=function(){ btn.textContent="Download certificate"; btn.disabled=false; alert("Could not generate image. Please try again."); };
+      s.onerror=function(){
+        btn.textContent="Download certificate";
+        btn.disabled=false;
+        alert("Could not load image library. Please try again.");
+      };
       document.head.appendChild(s);
-    } else { runCapture(); }
+    } else {
+      runCapture();
+    }
   }
 
   function retake(){
