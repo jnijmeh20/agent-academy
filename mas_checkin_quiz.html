@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Academy — Quick Check</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#000048;--navy2:#0d0d6b;
+  --teal:#05819B;--teal2:#06C7CC;
+  --blue:#2F78C4;--blue2:#6AA2DC;--blue3:#92BBE6;
+  --white:#fff;--offwhite:#f4f6fa;
+  --gray:#e8ecf3;--graymid:#8a94a8;
+  --green:#1db87e;--greenbg:#e6f9f2;
+  --red:#e0455a;--redbg:#fdeef0;
+  --selbg:#EBF4FF;--selborder:#2F78C4;
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html,body{margin:0;padding:0;width:100%;font-family:var(--font);background:var(--offwhite);color:var(--navy)}
+.wrap{width:100%;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--navy);padding:22px 40px 18px;position:relative;overflow:hidden;flex-shrink:0}
+.hdr::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border-radius:50%;background:var(--teal);opacity:.07}
+.hdr-eye{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal2);margin-bottom:4px}
+.hdr-title{font-size:20px;font-weight:700;color:var(--white);margin-bottom:3px}
+.hdr-sub{font-size:14px;color:var(--blue3)}
+.prog-wrap{background:var(--navy2);height:4px;flex-shrink:0}
+.prog-fill{height:100%;background:var(--teal2);transition:width .4s ease;width:0}
+.body{background:var(--white);padding:32px 40px;flex:1;display:flex;flex-direction:column}
+.intro{display:flex;flex-direction:column}
+.intro.hide{display:none}
+.intro-badge{display:inline-flex;align-items:center;gap:8px;background:var(--offwhite);border:1px solid var(--gray);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--graymid);margin-bottom:18px;align-self:flex-start}
+.intro-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px;line-height:1.3}
+.intro-body{font-size:16px;color:#444;line-height:1.7;margin-bottom:22px;max-width:520px}
+.intro-rules{background:var(--offwhite);border:1px solid var(--gray);border-radius:10px;padding:16px 20px;margin-bottom:24px;display:flex;flex-direction:column;gap:9px}
+.intro-rule{display:flex;align-items:flex-start;gap:10px;font-size:15px;color:var(--navy);line-height:1.5}
+.rule-dot{width:7px;height:7px;border-radius:50%;background:var(--teal2);margin-top:6px;flex-shrink:0}
+.start-btn{background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:12px 26px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;align-self:flex-start;transition:background .15s;display:flex;align-items:center;gap:9px}
+.start-btn:hover{background:var(--navy2)}
+.qpanel{display:none;flex-direction:column}
+.qpanel.show{display:flex}
+.qmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-shrink:0}
+.qcount{font-family:var(--mono);font-size:13px;color:var(--graymid)}
+.qcount span{color:var(--blue);font-weight:500}
+.qdots{display:flex;gap:6px}
+.qdot{width:8px;height:8px;border-radius:50%;background:var(--gray);transition:background .2s}
+.qdot.active{background:var(--blue)}
+.qdot.done{background:var(--teal2)}
+.qtext{font-size:18px;font-weight:500;line-height:1.6;color:var(--navy);margin-bottom:18px;flex-shrink:0}
+.opts{display:flex;flex-direction:column;gap:9px;margin-bottom:22px;flex:1}
+.opt{width:100%;text-align:left;padding:13px 16px;border-radius:8px;border:1.5px solid var(--gray);background:var(--offwhite);font-family:var(--font);font-size:16px;color:var(--navy);cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:flex-start;gap:10px;line-height:1.5}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--selbg)}
+.opt.sel{border-color:var(--selborder);background:var(--selbg)}
+.opt.sel .ol{color:var(--blue)}
+.opt:disabled{cursor:default}
+.ol{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--graymid);min-width:18px;margin-top:2px}
+.qnav{display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.qhint{font-size:14px;color:var(--graymid)}
+.nbtn{background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:12px 24px;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;transition:background .15s,opacity .15s;display:flex;align-items:center;gap:7px;opacity:.35;pointer-events:none}
+.nbtn.on{opacity:1;pointer-events:all}
+.nbtn.on:hover{background:var(--navy2)}
+.res{display:none;flex-direction:column;align-items:center}
+.res.show{display:flex}
+.sring{width:100px;height:100px;margin:0 auto 16px;position:relative}
+.sring svg{transform:rotate(-90deg)}
+.sring circle{transition:stroke-dashoffset .8s ease}
+.snum{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:24px;font-weight:700;color:var(--navy);text-align:center;line-height:1.1}
+.snum span{font-size:12px;color:var(--graymid);font-weight:400}
+.rbadge{display:inline-block;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:600;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.rbadge.pass{background:var(--greenbg);color:#0d5c3a}
+.rbadge.fail{background:var(--redbg);color:#7a1b27}
+.rtitle{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:5px;text-align:center}
+.rsub{font-size:15px;color:var(--graymid);line-height:1.6;margin-bottom:22px;text-align:center;max-width:420px}
+.bdwrap{width:100%;border:1px solid var(--gray);border-radius:10px;overflow:hidden;margin-bottom:18px}
+.bdhdr{background:var(--offwhite);padding:9px 16px;font-size:12px;font-weight:600;color:var(--graymid);font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--gray)}
+.bditem{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-bottom:1px solid var(--gray);font-size:15px}
+.bditem:last-child{border-bottom:none}
+.bdico{width:18px;height:18px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px}
+.bdico.c{background:var(--green)}
+.bdico.w{background:var(--red)}
+.bdico svg{width:9px;height:9px;stroke:white}
+.bdq{color:var(--navy);line-height:1.4;font-weight:500}
+.bdans{font-size:13px;color:var(--graymid);margin-top:2px}
+.bdans.w{color:var(--red)}
+.ract{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.retake{background:transparent;border:1.5px solid var(--navy);color:var(--navy);border-radius:8px;padding:11px 22px;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+.retake:hover{background:var(--navy);color:var(--white)}
+.slide{animation:fadeUp .22s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-eye">Agent Academy &middot; Agentic AI</div>
+    <div class="hdr-title">Quick Check</div>
+    <div class="hdr-sub">Lesson 3: GenAI vs AI Agents vs Multi-Agent Systems vs Agentic AI</div>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+  <div class="body">
+
+    <div class="intro" id="introScreen">
+      <div class="intro-badge">Quick check &middot; 4 questions</div>
+      <div class="intro-title">Let's check the definitions.</div>
+      <div class="intro-body">Four quick questions on the concepts from this lesson. No tricks, just making sure the terms are clear.</div>
+      <div class="intro-rules">
+        <div class="intro-rule"><div class="rule-dot"></div><span>4 definition-based questions</span></div>
+        <div class="intro-rule"><div class="rule-dot"></div><span>No feedback until the end</span></div>
+      </div>
+      <button class="start-btn" id="startBtn">
+        Start
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="qpanel" id="qPanel">
+      <div class="qmeta">
+        <div class="qcount">Question <span id="qNum">1</span> of 4</div>
+        <div class="qdots" id="qDots"></div>
+      </div>
+      <div class="qtext" id="qText"></div>
+      <div class="opts" id="optsList"></div>
+      <div class="qnav">
+        <div class="qhint" id="qHint">Select an answer to continue</div>
+        <button class="nbtn" id="nextBtn">
+          <span id="nextBtnLabel">Next</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="res" id="resPanel">
+      <div class="sring">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#e8ecf3" stroke-width="8"/>
+          <circle id="scoreArc" cx="50" cy="50" r="42" fill="none" stroke="#05819B" stroke-width="8" stroke-dasharray="264" stroke-dashoffset="264" stroke-linecap="round"/>
+        </svg>
+        <div class="snum" id="scoreNum">0<br><span>/4</span></div>
+      </div>
+      <div class="rbadge" id="resBadge"></div>
+      <div class="rtitle" id="resTitle"></div>
+      <div class="rsub" id="resSub"></div>
+      <div class="bdwrap" id="bdWrap"></div>
+      <div class="ract"><button class="retake" id="retakeBtn">Try again</button></div>
+    </div>
+
+  </div>
+</div>
+<script>
+(function(){
+  var Q=[
+    {
+      t:"Which type of AI is primarily used for content generation, such as writing, summarizing, and producing outputs in response to a prompt?",
+      o:[
+        "Generative AI, because agentic AI is a subset of it focused on autonomous action",
+        "Generative AI, because its primary purpose is producing content outputs from prompts",
+        "Agentic AI, because it uses a language model as its core reasoning engine",
+        "A single AI agent, because agents can generate text responses using tools"
+      ],
+      c:1
+    },
+    {
+      t:"What is the key difference between a generative AI model and an agentic AI system?",
+      o:[
+        "Generative AI produces outputs in response to prompts; agentic AI pursues goals autonomously across multiple steps without constant human input",
+        "Generative AI can use tools and APIs to take action; agentic AI is limited to generating text",
+        "Agentic AI relies on a language model to reason; generative AI does not use language models",
+        "Generative AI is a subset of agentic AI and cannot operate independently"
+      ],
+      c:0
+    },
+    {
+      t:"An AI agent is best described as which of the following?",
+      o:[
+        "The overarching paradigm for building systems that pursue goals with autonomy",
+        "A single autonomous unit designed to complete a specific task using tools and reasoning within a defined scope",
+        "A coordination layer that routes work across multiple specialized language models",
+        "Any AI system that retrieves external knowledge before generating a response"
+      ],
+      c:1
+    },
+    {
+      t:"When does a multi-agent system make more sense than a single AI agent?",
+      o:[
+        "When the task requires deep specialization, parallel execution, or is too large and complex for one agent to handle reliably",
+        "When the task is well-defined and bounded enough for one agent to complete reliably on its own",
+        "When the system needs to generate content faster by distributing generation across models",
+        "When you want to reduce the total number of tools the system has access to"
+      ],
+      c:0
+    }
+  ];
+
+  var cur=0,sel=[-1,-1,-1,-1],ans=[-1,-1,-1,-1];
+  var total=Q.length;
+
+  function init(){
+    buildDots();
+    document.getElementById("startBtn").addEventListener("click",startQuiz);
+    document.getElementById("nextBtn").addEventListener("click",nextQ);
+    document.getElementById("retakeBtn").addEventListener("click",retake);
+  }
+
+  function buildDots(){
+    var w=document.getElementById("qDots");w.innerHTML="";
+    for(var i=0;i<total;i++){
+      var d=document.createElement("div");d.className="qdot";d.id="dot"+i;w.appendChild(d);
+    }
+  }
+
+  function updateDots(){
+    for(var i=0;i<total;i++){
+      var d=document.getElementById("dot"+i);if(!d)continue;
+      d.className="qdot";
+      if(i===cur)d.classList.add("active");
+      else if(ans[i]!==-1)d.classList.add("done");
+    }
+  }
+
+  function startQuiz(){
+    document.getElementById("introScreen").classList.add("hide");
+    document.getElementById("qPanel").classList.add("show");
+    renderQ();
+  }
+
+  function renderQ(){
+    var q=Q[cur];
+    document.getElementById("qNum").textContent=cur+1;
+    document.getElementById("progFill").style.width=((cur/total)*100)+"%";
+    var p=document.getElementById("qPanel");
+    p.classList.remove("slide");void p.offsetWidth;p.classList.add("slide");
+    document.getElementById("qText").textContent=q.t;
+    var list=document.getElementById("optsList");list.innerHTML="";
+    var L=["A","B","C","D"];
+    for(var i=0;i<q.o.length;i++){
+      (function(idx){
+        var wrap=document.createElement("div");
+        var btn=document.createElement("button");
+        btn.className="opt"+(sel[cur]===idx?" sel":"");
+        var letter=document.createElement("span");letter.className="ol";letter.textContent=L[idx];
+        var text=document.createElement("span");text.textContent=q.o[idx];
+        btn.appendChild(letter);btn.appendChild(text);
+        btn.addEventListener("click",function(){pick(idx);});
+        wrap.appendChild(btn);list.appendChild(wrap);
+      })(i);
+    }
+    var nb=document.getElementById("nextBtn");
+    nb.className="nbtn"+(sel[cur]!==-1?" on":"");
+    document.getElementById("qHint").textContent=sel[cur]!==-1?"":"Select an answer to continue";
+    document.getElementById("nextBtnLabel").textContent=cur===total-1?"See results":"Next";
+    updateDots();
+  }
+
+  function pick(idx){
+    sel[cur]=idx;
+    var btns=document.querySelectorAll(".opt");
+    for(var i=0;i<btns.length;i++)btns[i].classList.remove("sel");
+    btns[idx].classList.add("sel");
+    document.getElementById("nextBtn").classList.add("on");
+    document.getElementById("qHint").textContent="";
+  }
+
+  function nextQ(){
+    if(sel[cur]===-1)return;
+    ans[cur]=sel[cur];cur++;
+    if(cur>=total)showResults();else renderQ();
+  }
+
+  function showResults(){
+    document.getElementById("qPanel").classList.remove("show");
+    document.getElementById("progFill").style.width="100%";
+    document.getElementById("resPanel").classList.add("show");
+    var score=0;
+    for(var i=0;i<total;i++){if(ans[i]===Q[i].c)score++;}
+    var passed=score>=3;
+    var offset=264-(score/total)*264;
+    document.getElementById("scoreNum").innerHTML=score+"<br><span>/"+total+"</span>";
+    setTimeout(function(){
+      var arc=document.getElementById("scoreArc");
+      arc.style.strokeDashoffset=offset;
+      arc.style.stroke=passed?"#1db87e":"#e0455a";
+    },100);
+    var badge=document.getElementById("resBadge");
+    badge.textContent=passed?"Nice work":"Keep reviewing";
+    badge.className="rbadge "+(passed?"pass":"fail");
+    document.getElementById("resTitle").textContent=passed?"Definitions are clear.":"Worth another look.";
+    document.getElementById("resSub").textContent=passed
+      ?"You have a solid grasp of the key distinctions from this lesson."
+      :"Head back to Lesson 3 and focus on how each concept differs from the others.";
+    buildBreakdown();
+  }
+
+  function buildBreakdown(){
+    var bd=document.getElementById("bdWrap");
+    bd.innerHTML="<div class=\"bdhdr\">Review</div>";
+    var ck='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+    var cx='<svg viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+    for(var i=0;i<total;i++){
+      var ok=ans[i]===Q[i].c;
+      var ya=ans[i]!==-1?Q[i].o[ans[i]]:"Not answered";
+      var correct=Q[i].o[Q[i].c];
+      var el=document.createElement("div");el.className="bditem";
+      var qs=Q[i].t.length>72?Q[i].t.substring(0,72)+"...":Q[i].t;
+      el.innerHTML="<div class=\"bdico "+(ok?"c":"w")+"\">"+(ok?ck:cx)+"</div>"
+        +"<div><div class=\"bdq\">Q"+(i+1)+": "+qs+"</div>"
+        +(ok?"<div class=\"bdans\">Correct</div>":"<div class=\"bdans w\">Your answer: "+ya+"</div><div class=\"bdans\">Correct: "+correct+"</div>")
+        +"</div>";
+      bd.appendChild(el);
+    }
+  }
+
+  function retake(){
+    cur=0;
+    for(var i=0;i<total;i++){sel[i]=-1;ans[i]=-1;}
+    document.getElementById("resPanel").classList.remove("show");
+    document.getElementById("qPanel").classList.add("show");
+    renderQ();
+  }
+
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",init);}else{init();}
+})();
+</script>
+</body>
+</html>
