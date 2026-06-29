@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agent Academy — Single vs Multi-Agent Check-in</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#000048;--navy2:#0d0d6b;
+  --teal:#05819B;--teal2:#06C7CC;
+  --blue:#2F78C4;--blue3:#92BBE6;
+  --white:#fff;--offwhite:#f4f6fa;
+  --gray:#e8ecf3;--graymid:#8a94a8;
+  --green:#1db87e;--greenbg:#e6f9f2;--greenborder:#0ea864;
+  --red:#e0455a;--redbg:#fdeef0;--redborder:#c73550;
+  --selbg:#EBF4FF;--selborder:#2F78C4;
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+html,body{margin:0;padding:0;width:100%;font-family:var(--font);background:var(--offwhite);color:var(--navy)}
+.wrap{width:100%;min-height:100vh;display:flex;flex-direction:column}
+.hdr{background:var(--navy);padding:22px 36px 18px;flex-shrink:0;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:var(--teal);opacity:.07}
+.hdr-eye{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--teal2);margin-bottom:4px}
+.hdr-title{font-size:20px;font-weight:700;color:var(--white);margin-bottom:3px}
+.hdr-sub{font-size:14px;color:var(--blue3)}
+.prog-wrap{background:var(--navy2);height:4px}
+.prog-fill{height:100%;background:var(--teal2);transition:width .4s ease;width:0}
+.body{background:var(--white);padding:30px 36px;flex:1;display:flex;flex-direction:column}
+.intro{display:flex;flex-direction:column}
+.intro.hide{display:none}
+.intro-badge{display:inline-flex;align-items:center;background:var(--offwhite);border:1px solid var(--gray);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--graymid);margin-bottom:18px;align-self:flex-start}
+.intro-title{font-size:22px;font-weight:700;color:var(--navy);margin-bottom:8px}
+.intro-body{font-size:15px;color:#444;line-height:1.7;margin-bottom:24px;max-width:500px}
+.start-btn{background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:12px 26px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;align-self:flex-start;display:flex;align-items:center;gap:8px;transition:background .15s}
+.start-btn:hover{background:var(--navy2)}
+.qpanel{display:none;flex-direction:column}
+.qpanel.show{display:flex}
+.qmeta{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.qcount{font-family:var(--mono);font-size:13px;color:var(--graymid)}
+.qcount span{color:var(--blue);font-weight:500}
+.qdots{display:flex;gap:6px}
+.qdot{width:8px;height:8px;border-radius:50%;background:var(--gray);transition:background .2s}
+.qdot.active{background:var(--blue)}
+.qdot.correct{background:var(--green)}
+.qdot.wrong{background:var(--red)}
+.qtext{font-size:18px;font-weight:500;line-height:1.6;color:var(--navy);margin-bottom:20px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.opt{width:100%;text-align:left;padding:13px 16px;border-radius:8px;border:1.5px solid var(--gray);background:var(--offwhite);font-family:var(--font);font-size:15px;color:var(--navy);cursor:pointer;display:flex;align-items:flex-start;gap:10px;line-height:1.5;transition:border-color .15s,background .15s}
+.opt:hover:not(:disabled){border-color:var(--blue);background:var(--selbg)}
+.opt.sel{border-color:var(--selborder);background:var(--selbg)}
+.opt.correct{border-color:var(--greenborder);background:var(--greenbg);cursor:default}
+.opt.wrong{border-color:var(--redborder);background:var(--redbg);cursor:default}
+.opt.dimmed{opacity:.45;cursor:default}
+.opt:disabled{cursor:default}
+.ol{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--graymid);min-width:18px;margin-top:2px;flex-shrink:0}
+.opt.correct .ol{color:var(--green)}
+.opt.wrong .ol{color:var(--red)}
+.feedback{border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:14px;line-height:1.6;display:none}
+.feedback.show{display:block}
+.feedback.correct{background:var(--greenbg);border:1px solid var(--greenborder);color:#0a4a2a}
+.feedback.wrong{background:var(--redbg);border:1px solid var(--redborder);color:#6b1525}
+.feedback-label{font-weight:700;margin-bottom:3px}
+.qnav{display:flex;justify-content:flex-end;align-items:center}
+.nbtn{background:var(--navy);color:var(--white);border:none;border-radius:8px;padding:11px 22px;font-family:var(--font);font-size:15px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;opacity:.35;pointer-events:none;transition:background .15s,opacity .15s}
+.nbtn.on{opacity:1;pointer-events:all}
+.nbtn.on:hover{background:var(--navy2)}
+.res{display:none;flex-direction:column;align-items:center}
+.res.show{display:flex}
+.sring{width:96px;height:96px;margin:0 auto 16px;position:relative}
+.sring svg{transform:rotate(-90deg)}
+.sring circle{transition:stroke-dashoffset .8s ease}
+.snum{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:22px;font-weight:700;color:var(--navy);text-align:center;line-height:1.1}
+.snum span{font-size:12px;color:var(--graymid);font-weight:400}
+.rtitle{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:6px;text-align:center}
+.rsub{font-size:14px;color:var(--graymid);line-height:1.6;margin-bottom:22px;text-align:center;max-width:400px}
+.ract{display:flex;gap:10px;justify-content:center}
+.retake{background:transparent;border:1.5px solid var(--navy);color:var(--navy);border-radius:8px;padding:10px 22px;font-family:var(--font);font-size:14px;font-weight:500;cursor:pointer;transition:background .15s,color .15s}
+.retake:hover{background:var(--navy);color:var(--white)}
+.slide{animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hdr">
+    <div class="hdr-eye">Agent Academy &middot; Multi-Agent Systems</div>
+    <div class="hdr-title">Check Your Understanding</div>
+    <div class="hdr-sub">Lesson 2: Single vs Multi-Agent Systems</div>
+  </div>
+  <div class="prog-wrap"><div class="prog-fill" id="progFill"></div></div>
+  <div class="body">
+
+    <div class="intro" id="introScreen">
+      <div class="intro-badge">5 questions</div>
+      <div class="intro-title">See if you can tell them apart.</div>
+      <div class="intro-body">Five quick questions on the differences between single-agent and multi-agent systems. You will get instant feedback after each answer.</div>
+      <button class="start-btn" id="startBtn">
+        Start
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+
+    <div class="qpanel" id="qPanel">
+      <div class="qmeta">
+        <div class="qcount">Question <span id="qNum">1</span> of 5</div>
+        <div class="qdots" id="qDots"></div>
+      </div>
+      <div class="qtext" id="qText"></div>
+      <div class="opts" id="optsList"></div>
+      <div class="feedback" id="feedbackBox">
+        <div class="feedback-label" id="feedbackLabel"></div>
+        <div id="feedbackText"></div>
+      </div>
+      <div class="qnav">
+        <button class="nbtn" id="nextBtn">
+          <span id="nextBtnLabel">Next</span>
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="res" id="resPanel">
+      <div class="sring">
+        <svg width="96" height="96" viewBox="0 0 96 96">
+          <circle cx="48" cy="48" r="40" fill="none" stroke="#e8ecf3" stroke-width="8"/>
+          <circle id="scoreArc" cx="48" cy="48" r="40" fill="none" stroke="#05819B" stroke-width="8" stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round"/>
+        </svg>
+        <div class="snum" id="scoreNum">0<br><span>/5</span></div>
+      </div>
+      <div class="rtitle" id="resTitle"></div>
+      <div class="rsub" id="resSub"></div>
+      <div class="ract"><button class="retake" id="retakeBtn">Try again</button></div>
+    </div>
+
+  </div>
+</div>
+<script>
+(function(){
+  var Q=[
+    {
+      t:"Which property of single-agent systems makes them a bottleneck as tasks grow in complexity?",
+      o:[
+        "They rely on localized knowledge, which becomes incomplete at scale",
+        "All perception, reasoning, and action are routed through one model",
+        "They require multiple tools, which slows down processing",
+        "They cannot store memory across tasks"
+      ],
+      c:1,
+      fb_correct:"Exactly. A single agent handles everything centrally, which is fine for bounded tasks but becomes a bottleneck when the scope grows.",
+      fb_wrong:"The key issue is centralization — all processing flows through one model. That single path is what creates the bottleneck."
+    },
+    {
+      t:"In a multi-agent system, why does one agent failing not necessarily stop the whole workflow?",
+      o:[
+        "Because a supervisor agent automatically restarts any agent that fails",
+        "Because all agents keep a copy of each other's work as a backup",
+        "Because other agents are working in parallel on their own portions of the task and can continue without the failed agent",
+        "Because multi-agent systems queue failed tasks and replay them when the agent recovers"
+      ],
+      c:2,
+      fb_correct:"Exactly. The distributed nature of multi-agent systems means no single agent is a critical dependency for the whole workflow.",
+      fb_wrong:"The key is distribution. Because multiple agents work simultaneously on different parts of the task, one failing does not bring down the rest."
+    },
+    {
+      t:"What does parallel task execution in a multi-agent system actually mean?",
+      o:[
+        "One agent completes each task faster because it has more compute",
+        "Multiple agents work simultaneously on different parts of a task or across multiple tasks at the same time",
+        "Tasks are broken into steps and each step runs after the previous one finishes",
+        "Agents take turns processing tasks to avoid conflicts"
+      ],
+      c:1,
+      fb_correct:"Correct. Multiple agents run at the same time on different parts of the problem — that is what makes multi-agent systems more efficient under heavy workloads.",
+      fb_wrong:"Parallel means simultaneous. Multiple agents each handle a different piece of work at the same time, rather than one agent processing everything in sequence."
+    },
+    {
+      t:"Multi-agent systems use localized or partial knowledge rather than centralized global knowledge. Why does that matter?",
+      o:[
+        "It means each agent can make decisions based on its own context without waiting for full global synchronization, enabling faster and more adaptive responses",
+        "It reduces the cost of the system because agents need less data",
+        "It means agents do not need to communicate with each other",
+        "It prevents any single agent from accumulating too much information"
+      ],
+      c:0,
+      fb_correct:"Exactly. Each agent acts on what it knows locally, without needing the whole system to sync first — that reduces overhead and speeds up response.",
+      fb_wrong:"The advantage is speed and adaptability. When agents don't need full global synchronization before acting, the system responds faster and handles complexity more flexibly."
+    },
+    {
+      t:"Which of the following tasks would a single-agent system handle better than a multi-agent system?",
+      o:[
+        "Real-time logistics coordination across multiple warehouses simultaneously",
+        "Processing a large volume of parallel requests across different domains",
+        "A focused, bounded task like drafting a summary from a single document",
+        "A workflow that requires different specialized capabilities running in parallel"
+      ],
+      c:2,
+      fb_correct:"Right. Single-agent systems work well when the task is focused and bounded — one document, one clear goal, no need for specialization or parallelism.",
+      fb_wrong:"Single-agent systems are best suited for focused, bounded tasks — not workflows that require scale, specialization, or parallel execution. Drafting from one document fits that profile exactly."
+    }
+  ];
+
+  var cur=0,score=0,answered=false,total=Q.length;
+
+  function init(){
+    buildDots();
+    document.getElementById("startBtn").addEventListener("click",startQuiz);
+    document.getElementById("nextBtn").addEventListener("click",nextQ);
+    document.getElementById("retakeBtn").addEventListener("click",retake);
+  }
+
+  function buildDots(){
+    var w=document.getElementById("qDots");w.innerHTML="";
+    for(var i=0;i<total;i++){var d=document.createElement("div");d.className="qdot";d.id="dot"+i;w.appendChild(d);}
+  }
+
+  function startQuiz(){
+    document.getElementById("introScreen").classList.add("hide");
+    document.getElementById("qPanel").classList.add("show");
+    renderQ();
+  }
+
+  function renderQ(){
+    answered=false;
+    var q=Q[cur];
+    document.getElementById("qNum").textContent=cur+1;
+    document.getElementById("progFill").style.width=((cur/total)*100)+"%";
+    var p=document.getElementById("qPanel");
+    p.classList.remove("slide");void p.offsetWidth;p.classList.add("slide");
+    document.getElementById("qText").textContent=q.t;
+
+    // reset feedback
+    var fb=document.getElementById("feedbackBox");
+    fb.className="feedback";
+    fb.classList.remove("show");
+
+    var list=document.getElementById("optsList");list.innerHTML="";
+    var L=["A","B","C","D"];
+    for(var i=0;i<q.o.length;i++){
+      (function(idx){
+        var btn=document.createElement("button");
+        btn.className="opt";
+        var letter=document.createElement("span");letter.className="ol";letter.textContent=L[idx];
+        var text=document.createElement("span");text.textContent=q.o[idx];
+        btn.appendChild(letter);btn.appendChild(text);
+        btn.addEventListener("click",function(){if(!answered)pick(idx);});
+        list.appendChild(btn);
+      })(i);
+    }
+
+    var nb=document.getElementById("nextBtn");
+    nb.className="nbtn";
+    document.getElementById("nextBtnLabel").textContent=cur===total-1?"See results":"Next";
+
+    // update dots
+    for(var i=0;i<total;i++){
+      var d=document.getElementById("dot"+i);if(!d)continue;
+      if(i===cur)d.className="qdot active";
+    }
+  }
+
+  function pick(idx){
+    if(answered)return;
+    answered=true;
+    var q=Q[cur];
+    var btns=document.querySelectorAll(".opt");
+    var correct=(idx===q.c);
+    if(correct)score++;
+
+    for(var i=0;i<btns.length;i++){
+      btns[i].disabled=true;
+      if(i===q.c){btns[i].className="opt correct";}
+      else if(i===idx&&!correct){btns[i].className="opt wrong";}
+      else{btns[i].className="opt dimmed";}
+    }
+
+    // show feedback
+    var fb=document.getElementById("feedbackBox");
+    document.getElementById("feedbackLabel").textContent=correct?"Correct":"Incorrect";
+    document.getElementById("feedbackText").textContent=correct?q.fb_correct:q.fb_wrong;
+    fb.className="feedback "+(correct?"correct":"wrong")+" show";
+
+    // update dot
+    var d=document.getElementById("dot"+cur);
+    if(d)d.className="qdot "+(correct?"correct":"wrong");
+
+    document.getElementById("nextBtn").classList.add("on");
+  }
+
+  function nextQ(){
+    cur++;
+    if(cur>=total)showResults();else renderQ();
+  }
+
+  function showResults(){
+    document.getElementById("qPanel").classList.remove("show");
+    document.getElementById("progFill").style.width="100%";
+    document.getElementById("resPanel").classList.add("show");
+    var offset=251-(score/total)*251;
+    document.getElementById("scoreNum").innerHTML=score+"<br><span>/"+total+"</span>";
+    setTimeout(function(){
+      var arc=document.getElementById("scoreArc");
+      arc.style.strokeDashoffset=offset;
+      arc.style.stroke=score>=4?"#1db87e":score>=3?"#2F78C4":"#e0455a";
+    },100);
+    document.getElementById("resTitle").textContent=score===5?"Solid.":score>=3?"Good progress.":"Worth reviewing.";
+    document.getElementById("resSub").textContent=score===5
+      ?"You have the differences down clearly."
+      :score>=3
+      ?"A few distinctions to sharpen — head back to the comparison table for a quick review."
+      :"Review Lesson 2 before moving on, especially the tradeoffs around scalability, robustness, and parallel execution.";
+  }
+
+  function retake(){
+    cur=0;score=0;answered=false;
+    document.getElementById("resPanel").classList.remove("show");
+    document.getElementById("qPanel").classList.add("show");
+    // reset dots
+    for(var i=0;i<total;i++){var d=document.getElementById("dot"+i);if(d)d.className="qdot";}
+    renderQ();
+  }
+
+  if(document.readyState==="loading"){document.addEventListener("DOMContentLoaded",init);}else{init();}
+})();
+</script>
+</body>
+</html>
