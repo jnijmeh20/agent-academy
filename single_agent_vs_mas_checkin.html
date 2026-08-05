@@ -144,25 +144,25 @@ html,body{margin:0;padding:0;width:100%;font-family:var(--font);background:var(-
       t:"Which property of single-agent systems makes them a bottleneck as tasks grow in complexity?",
       o:[
         "They rely on localized knowledge, which becomes incomplete at scale",
-        "All perception, reasoning, and action are routed through one model",
+        "All perception, reasoning, and action are handled by a single agent, with no work distributed across separate agents",
         "They require multiple tools, which slows down processing",
         "They cannot store memory across tasks"
       ],
       c:1,
-      fb_correct:"Exactly. A single agent handles everything centrally, which is fine for bounded tasks but becomes a bottleneck when the scope grows.",
-      fb_wrong:"The key issue is centralization — all processing flows through one model. That single path is what creates the bottleneck."
+      fb_correct:"Exactly. A single agent handles every step itself, with nothing distributed across separate agents, which works fine for bounded tasks but becomes a bottleneck as scope grows.",
+      fb_wrong:"The key issue is centralization — one agent handles every step itself, with no distribution of work across separate agents. That single path is what creates the bottleneck."
     },
     {
       t:"In a multi-agent system, why does one agent failing not necessarily stop the whole workflow?",
       o:[
         "Because a supervisor agent automatically restarts any agent that fails",
         "Because all agents keep a copy of each other's work as a backup",
-        "Because other agents are working in parallel on their own portions of the task and can continue without the failed agent",
+        "Because work is distributed across multiple agents, so the ones handling other parts of the task can continue even if one agent fails",
         "Because multi-agent systems queue failed tasks and replay them when the agent recovers"
       ],
       c:2,
-      fb_correct:"Exactly. The distributed nature of multi-agent systems means no single agent is a critical dependency for the whole workflow.",
-      fb_wrong:"The key is distribution. Because multiple agents work simultaneously on different parts of the task, one failing does not bring down the rest."
+      fb_correct:"Exactly. Because the work is distributed across agents rather than depending on one, the agents handling other parts of the task can continue even when one fails.",
+      fb_wrong:"The key is distribution, not timing. Because work is split across multiple agents rather than depending on one, the others can continue their parts of the task even if one fails, whether they're running in parallel or in sequence."
     },
     {
       t:"What does parallel task execution in a multi-agent system actually mean?",
@@ -193,12 +193,12 @@ html,body{margin:0;padding:0;width:100%;font-family:var(--font);background:var(-
       o:[
         "Real-time logistics coordination across multiple warehouses simultaneously",
         "Processing a large volume of parallel requests across different domains",
-        "A focused, bounded task like drafting a summary from a single document",
+        "A quick, well-defined task like drafting a summary from a single short memo",
         "A workflow that requires different specialized capabilities running in parallel"
       ],
       c:2,
-      fb_correct:"Right. Single-agent systems work well when the task is focused and bounded — one document, one clear goal, no need for specialization or parallelism.",
-      fb_wrong:"Single-agent systems are best suited for focused, bounded tasks — not workflows that require scale, specialization, or parallel execution. Drafting from one document fits that profile exactly."
+      fb_correct:"Right. Single-agent systems work well when the task is small and bounded — one short document, one clear goal, no need for specialization or parallelism. (For a very long document, splitting the work across agents can actually be faster.)",
+      fb_wrong:"Single-agent systems are best suited for small, bounded tasks — not workflows that require scale, specialization, or parallel execution. A short memo fits that profile; a very long document is exactly where a multi-agent system can start to win."
     }
   ];
 
